@@ -1,0 +1,296 @@
+				CCLXPOP
+
+
+ccLXPOP is a program to utilize the LXMTA/LXTCP utilities written by Rod Whitby with ccMail. If you have setup LXTCP to work with your HPLX, you should be able to make this work with ccMail for a nice easy interface for email. Once setup, you will type in your outgoing emails using ccMail, then send the email using ccLXPOP and either LXPOP or LXMTA. ccLXPOP will run under a DOS window in system manager with no problem- no need for MAXDOS or exiting system manager. ccLXPOP will load the incoming emails into ccMail, and will read attachments encoded with base64 encoding. Files can be attached and will be sent using base64 encoding. Even if you are not familiar with LXTCP, this system can be easy to setup if your ISP supports the Bootp protocol.
+
+A quick note of explanation on LXMTA versus LXNNTP/LXPOP: LXMTA (LX Message Transfer Agent) is a program authored by Rod Whitby which does a whole lot of really cool stuff, including SMTP (sending mail), POP3 (receiving mail), NNTP (send / receive newsgroups) and IMAP (a more modern email server for receiving mail). It's principle advantage over the LXPOP/LXNNTP combination is the ability to do all of the above. It's only disadvantage is that it is bigger than LXPOP by itself (LXMTA is 120K, LXPOP is 62K, LXNNTP is 65K). One particular case where you may want to use LXPOP is when you are using a PCMCIA modem to get your email and you have limited room on your internal C: drive. In this case, you can have full email capability (but not newsgroups) with LXPOP and ccLXPOP for under 120K in program, leaving as much room as possible. With LXNNTP you can have newsgroups as well. This will work easily on 2MB or above, and will work (albeit with limited download room) on 1MB unit as well. The easiest setup will be with LXMTA, though LXPOP and LXNNTP are not hard. The examples provided are for LXMTA - I trust that with those as examples and with the documentation for LXTCP you can make the others work as well.
+
+Instructions for using ccLXPOP.
+
+Contents:
+1. Setting up configuration files
+2. Setting up ccMail
+3. Operation
+4. Address Lists
+5. Using ccLXPOP to route mail to folders
+6. Some Reminders
+7. Using ccLXPOP and LXPOP/LXMTA on a desktop 
+8. Downloading multiple email accounts
+9. "POPPING" before "SMTP"
+10. ccMade
+11. Useful Macros
+12. Closing comments
+
+			1. Setting up configuration files
+
+	ccLXPOP utilizes a separate configuration file titled cclxpop.cfg. I recommend putting ccLXPOP.exe and ccLXPOP.cfg in the same directory as the rest of the programs (LXMTA or LXPOP/LXNNTP) for ease of use. What follows is my cclxpop.cfg file. Note that all you email data (SMTP, POP3, NNTP, and IMAP data) goes into tcp.cfg configuration file.  One additional configuration file (covered in section 5) is cclxpop.fld, which provides the ability to send incoming emails to a particular folder based on header contents.
+
+
+;ccLXPOP Configuration File
+;The following are required entries:
+
+spooldir="c:\lxmta\spool\"		;same spooldir as LXMTA/LXPOP/LXNNTP
+ccpath="c:\_dat\mail\" 			;Location of ccmail files
+from="Brian.McIlvaine@unbounded.com"	;From for outgoing messages/news
+
+;The following are optional, but recommended:
+
+timezone="-0400"	
+		;Offset from UT/GMT. Set to "0000" if not in config file
+
+;The following are optional:
+
+;sentfolder=2	;Folder sent mail is put into. Default is 2, can be any
+		;Folder #
+;outboxfolder=1	;folder where ccMail looks for its mail
+;appendhdr=1	;if 1, add header info to end of message, else trash
+;verbose=1	;Provide a lot of detail regarding incoming messages
+	;if verbose=2, then only attached files are noted. This is 
+	;useful to detect attached files as part of the threading process.
+
+sigfile="c:\_dat\mail\exsigfil.txt"
+		;This is a signature file which
+ 		;will be appended to the body of each outgoing message. If 
+		;this parameter is missing, nothing is added.
+
+That is the extent of the cclxpop.cfg file. You will also need to set up the configuration files for LXMTA, or LXNNTP/LXPOP. I recommend the outstanding documentation provided by Rod Whitby to give you all the data you need. I provide my files here only as reference. See LXTCP docs for details. You will note the IMAP options are commented out, as I use a POP3 email server.
+
+my_ip=bootp			; Note that "my_ip=bootp" is preferred.
+domainslist="worldnet.att.net"	; May be provided by BOOTP server.
+hostname=hp200lx		; May be provided by BOOTP server.
+smtp.server=mailhost.att.net	; Change to your SMTP server.
+pop.server=pop.mail.yahoo.com	; Change to your POP server.
+pop.username="your.user.name"		; Your POP account name.
+pop.password="notmyrealpassword"		; Your POP account password.
+;imap.server=pop.mail.yahoo.com	; Change to your IMAP server.
+;imap.username="your.imap.user.name"		; Your IMAP account name.
+;imap.password="notmyrealpassword"		; Your IMAP account password.
+nntp.server=netnews.att.net	; Change to your NNTP server.
+lxmta.spooldir="c:\lxmta\spool"    ; Your PNR spool directory.
+lxmta.newsrc=incoming.jn	; Your NNTP newsrc file.
+smtp.delete=1		; Delete sent mail from palmtop.
+nntp.delete=1		; Delete posted news from palmtop.
+
+
+Just for information, a typical PPPD.CFG file looks like:
+
+
+COM2
+19200
+crtscts
+connect "chat '' AT&F OK ATDT6160000 CONNECT"
+user youruserinfo@yourISP.com
+passwd yourpasswordhere
+namsrv 204.127.129.1
+namsrv 204.127.160.1
+
+
+namsrv in the above example are the primary (and alternate, if available) DNS servers at your ISP. COM1=Serial, COM2=PCMCIA. One "GOTCHA" that caught me: in the "connect" line above, spaces in the text between the " marks is critical. For example, if you change the above to read ATDT 6160000 in the above string, it will not work. It can be tricky getting this part setup. 
+
+
+				2. Setting up ccMail
+ccMail requires a little preparation if you are not currently using ccMail with palmtop.com, for example.
+
+a. Start up ccMail. Select "File" and then "Mailbox Locations" and set the directory. This directory defaults to c:\_dat\mail. It does not have to be the same as the spooldir used in LXPOP/LXMTA, and I recommend that they be different so that it is easy to track sent files.
+
+a. Hit "Create" (F4), and make a short message. Address it to yourself. Fill in a subject and put something in the body. This message won't actually get sent, but it sets up the files in the directory needed for ccLXPOP to work.
+
+	c. Press Send (F5), Make sure that the mail box is checked (Alt-M)  and press "Yes" (F7).
+
+	d. Select the outbox, highlight the message you just sent to the outbox, and press "Move" (F3). Press "New Folder" (Alt-N) and type in "Sent Mail" or whatever title you desire for the folder that will hold your sent mail. This will show up as the second folder in your folders list. You can access this folder and delete your email, if desired.
+
+The purpose of this section is to ensure that all the files that are needed for operation of ccLXPOP are created and in the condition needed, and the two minimum folders ccLXPOP expects (outbox and sentfolder) are created.
+
+					3. Operation
+
+Operation of ccMail is relatively straightforward. Mail is written in ccMail. The "to' address can be in standard address form, for example: bamcilvaine@geocities.com, or "Brian McIlvaine" <bamcilvaine@geocities.com>.
+
+				!!!!CAUTION!!!!
+ccLXPOP will currently work with standard email addresses (joe@home.com), or entries from the address book. For those of you using palmtop.com, you must take the "at Internet" off the end of the addresses. One anomaly - if you reply to a message with a name format:
+ ("Brian McIlvaine <bamcilvaine@geocities.com>")
+then ccMail will for some reason create a new outbox at the end of your folders list with this one message in it. Just move the message from the new outbox to your real outbox (F7 Folders, {End} to go to last folder, {Enter} to access that folder, {F3 Move} to move it to the outbox, then delete the now empty new outbox folder. You can get around this by simply editing the to address to contain only the email address. ccMail works fine if you do this.
+
+cc and bcc fields will work. Type in your message and save it as Mail. Make sure that the folder labeled "Outbox: ******" is the same as outboxfolder. It should be the first folder in the list, and the outboxfolder should thus be one. If it is different because of your setup, change the folder number accordingly. The ****** annotated above will depend on your setup. As mentioned above, make sure sentfolder is set to the folder that will hold your sent mail, typically 2 if you followed the setup instructions above.
+
+Once you have created your outgoing mail - 
+				!!!QUIT CCMAIL!!!
+if you don't, ccLXPOP tells you so and will abort, as the files for indexing your emails won't be updated properly if it is open. 
+
+There are three command line options for ccLXPOP: send, recvmail, and recvnews. Send will look for outgoing messaged in your ccMail outbox and generate files titled outgoing.m00, outgoing.m01, etc. for mail and outgoing.n00, outgoing.n01 for news, which will be used by LXMTA or LXPOP/LXNEWS. Recvnews and recvmail look for incoming.nws and incoming.mai and trhead the incoming news and mail. Running cclxpop with no arguments results in all three (send, recvnews, recvmail) being executed. Remember - outgoing messages are sent until you send with LXMTA / LXPOP / LXNEWS.
+
+Command line arguments can be entered, and will override your configuration file entries. For example, if you wanted to generate email with a from address different from your config file:
+cclxpop send from=bamcilvaine@juno.com.
+
+
+The easiest way to handle this is with a batch file. Execute the EMAIL.BAT file. This file prepares the outgoing messages into the spool directory with the command "ccLXPOP send", then loads the packet driver {epppd}, sends and receives mail / news {lxmta}, terminates the packet driver {termin}, and then threads in the new messages and newsgroups {cclxpop recvnews recvmail}. EMAIL1.BAT demonstrates use with LXMTA, EMAIL2.BAT with LXPOP/LXNNTP. I have this setup as an entry in the Apllication Manager (&...). Don't forget to:
+
+A. Put the upside down exclamation point in the comments (Fn-Filer)
+A. Enable com port power in DOS (Setup - Options - Communications Port - Enable COM1 port power in DOS) (if using an external modem).
+C. Have a PCMCIA Modem driver (I recommend LXCIC.com - available at the S.U.P.E.R. site) loaded. This is a very small driver, and I load right before epppd and then unload after completion of the online session. This works best, particularly if you swap pcmcia cards. You can also use cic100 available in the d:\bin directory.
+
+
+				NEWSGROUPS
+
+Newsgroups are handled with some peculiar rules so as to make everything work nicely. When newsgroups are downloaded, if a folder exists with the newsgroups name, that message is immediately sent to that folder. If none of the newsgroups in a particular message has a folder in ccMail, it is put in the in box. The "To:" address of the message will be all of the newsgroups listed in the newsgroups field of the message. The from will remain the person who wrote the message. I make this point clear because if you reply to the message, you will need to change the "To:" back to the newsgroup (e.g. hp200.software) unless you only want the message to go to the individual who sent the message. You can get around this by checking the "Reply to all" option, and then cutting and pasting the newsgroups into the "To:" field.
+
+That part should be pretty clear. Now the "catch". CcLXPOP thinks that any address that is made of only letters and periods (no spaces) is a newsgroup. So if your address book has an entry for "R.D.Jones", ccLXPOP thinks it is a newsgroup and will try to post it as a newsgroup message. The obvious fix for this is either: "R.D. Jones" (note the space), or even better, use a last name, first name construct in your ccMail address book: "Jones, R.D.". This discussion is duplicated in the following address book description.
+
+
+
+					4. Address book:
+
+I have implemented the address book. A couple of caveats:
+a. Don't make any of your entries into the address book NAMES contain the @ symbol (obviously, the address itself must have one). I use the absence of the @ sign as a key that the entry is an address book entry.
+b. If you don't have any spaces in your names, ccLXPOP is likely to think that it is a newsgroup. If your name entry is R.D.JONES, ccLXPOP thinks this is a newsgroup and the message will be sent to a non-existent newsgroup. I recommend that your address list be in Last, First name order: Jones, R.D. This will work fine (as ccMail converts this to "R.D. Jones" and the existence of the space in there convinces ccLXPOP that it is not a newsgroup.
+a. Address lists work. Note that in order to make address lists work, you can't use double indirection, though ccMail will let you do so. By this I mean that when you make an address list (Mail menu, Add/Modify Address list), type in the list name, and then under the list members, ONLY PUT THE INTERNET ADDRESSES!! ccMail will let you put another address book entry but my program won't look through the address book twice because it's (or more appropriately I'm) lazy. So the list members should all be of the form joe@home.com, etc. 
+
+
+
+	5. Using ccLXPOP.fld to route incoming messages to folders
+
+Let's assume that you would like to route incoming message based on what data is in some of the header fields. For example, you want to route all the messages from "girlfriend@hotbabe.com" to the folder titled "Love Letters." Further, you want to route all the messages that have the word "Fluff" in the subject to a folder titled "Light Reading". Finally, you want all of the emails sent to the particular email address "Secret.Agent@cia.gov" to be routed into a folder labeled "Top Secret". To accomplish this, make a file named "cclxpop.fld" and put it in the same directory as the one you run cclxpop.exe from. Put the following entries in it:
+
+From:, girlfriend@hotbabe.com ,Love Letters
+Subject:, Fluff, Light Reading
+To:, Secret.Agent@cia.gov, Top Secret
+
+cclxpop will check each incoming message against each rule in this folder and route the message to the appropriate folder accordingly. It only sends a message to one folder. So if "girlfriend" sends a message with "FLUFF" in the subject to Secret.Agent@cia.gov, cclxpop will put it into only the Love Letters folder. 
+
+Note that all searches are case insensitive, and the first rule that matches is the one that executes for that message.
+
+
+					6. Some Reminders: 
+
+	Okay, that should be enough for you to make it work. A couple of last minute reminders:
+
+a. Set the value of pop3.delete to false (lxmta.pop=0), so that you can use this to download your mail first, and then use a different email program if it screws up with loading your email. Once you are satisfied with the performance of ccLXPOP, clear the delete flag from your WATTCP.CFG/TCP.CFG file.
+b. There is almost no error detection in this program. It just assumes that the world is a kinder, gentler place and that the force is with your email. If it does run across an error, it will tell you it has done so. If while sending your mail to be sent, the files that are already in the spooldir are fine to be sent. If it chokes while threading (Lack of disk space?) it will abort, and will not delete the incoming.mai file so you are still good to go. You can always read that file with Memo!
+c. The maximum message size that can be read with ccMail is about 25K. If the body of a message is greater than 24K, it is saved as an attachment. This is a ccMail limitation, so I can't do much about it.
+
+The following information is for advanced users only. But it won't blow up your machine or anything...:)
+
+
+
+			7. Using ccLXPOP and LXMTA/LXPOP on the desktop. 
+
+	You can run ccLXPOP, epppd, and LXMTA from a desktop. The advantage of doing so is to take advantage of higher speed modem and processing. Note that unless you have ccMail on the desktop, you will not be able to look at the ccMail files, and if you do I don't know what will happen, as I do not have a desktop version of ccMail to test it against.
+
+Notes on setting up for "dual machine" use:
+
+To setup ccLXPOP for "dual machine" use, here is some guidance. My assumption is that you will want to use a PCMCIA card to retain your email data and pass back and forth between your deskptop and HPLX. The advantage of this is that you can use the higher modem and processing speed of the desktop to download / thread your mail, or even access a LAN for email and use ccMail for viewing. The real trick to all of this is not that sophisticated. in your WATTCP.CFG file, where you specify the spooldir, don't specify the drive, just the path. For example:
+cclxpop.spooldir=\lxmta\spool\
+cclxpop.ccpath=\pcmcia_dat\mail\
+
+There is one "gotcha" in this regard - if you download an attachment and the path name does not include a DRIVE Letter, ccMail will not be able to extract the attachments. This is not a huge deal, as in the body of the message you will see the filename the attachment was saved in the ccPath directory, which is always of the form XXXXXXXX.att for incoming attachment files. You can simply copy this file to wherever you want to keep it, supplying the filename you want to save it as.
+
+ccLXPOP will run as a DOS application under Windows 95. Not tested under 98 or NT. Good Luck - ccLXPOP will load your email faster this way, running on a 56Kb modem than on 14Kb modem and the HPLX - If you deal in large volumes of email, this might be helpful. I normally just let my HPLX download my mail, to be honest! But, I have done this, it does work!
+
+
+				8. Downloading multiple email accounts. 
+	
+	Note that you can use multiple runs of LXPOP/LXMTA to download several email accounts into your ccMail account. You could also have multiple directories of ccMail accounts, so that you simply use the Menu / File Location option in ccMail to shift between accounts. This has one disadvantage, or advantage, depending on how you look at it. Your address book is separate and distinct. To "sync" them you will have to copy from one directory to another. Below is the basic idea. TCPACCT1 contains the data for your first email account, which you want directed to the ccmail directory specified inc cclxdir1.cfg. Likewise, TCPACCT2 contains the data for your second email account, which you want directed to the ccMail directory specified in cclxdir2.cfg. If you want all to go to the same "account" this file is not needed. Your EMAIL.BAT file becomes:
+
+epppd
+copy tcpacct1.cfg tcp.cfg
+copy cclxdir1.cfg cclxpop.cfg
+cclxpop send
+LXMTA 
+Copy tcpacct2.cfg tcp.cfg
+Copy cclxdir2.cfg cclxpop.cfg
+Cclxpop send
+Lxmta
+Termin 0x60
+Cclxpop recvmail recvnews
+Copy cclxdir1.cfg
+Cclxpop recvmail recvnews
+
+Note that you can use the cclxpop.fld rules as discussed in section 5 to route different email accounts to each folder. Note also that the FROM address on replies is always going to be the FROM address in your cclxpop.cfg file.
+
+				9. "POPPING" before "SMTP". 
+
+	Some of the "free" email servers want you to POP before you SMTP. This requires a straightforward modification to the batch file:
+
+cclxpop send			;thread outgoing mail
+epppd					;load packet driver
+lxmta recvmail send recvnews  
+;pop first to receive mail LXMTA does in order specified.
+termin 0x60
+
+			
+If you use LXPOP, it's a little harder. You will need two LXTCP configutration files: One that has the SMTP data, and one with the POP3 data (assume they are SMTP.CFG and POP3.CFG). Your batch file will look like this:
+
+cclxpop send
+epppd
+copy pop3.cfg lxtcp.cfg
+lxpop
+copy smtp.cfg lxtcp.cfg
+lxpop
+lxnntp
+termin 0x6
+cclxpop recvmail recvnews
+
+
+
+						10. ccMade: 
+
+	ccMade is built into the HP 200LX and provides the means to import address book data into the HPLX. The format for the files ccMADE uses is as follows: { Thanks to Donald Collins dcollins@mscweb1.com for this idea }
+
+Print the address book out in the following report format:
+
+Name: John Soandso
+Locn:	A
+Addr: hisemail@isp.com
+Cmts: not used
+
+Name: Joan Soandso
+Locn: A
+Addr: Heremail@isp.com
+Cmts: not used
+
+Then use the ccMade file import capability to import it. 
+
+
+
+					11. Useful Macros: 
+
+	I find the following macros useful in ccMail. Send me yours if you have any improvements and I will incorporate them into the documentation.
+
+Description: Read attached message with Memo (used when body of message is >25K (ccMail limitation). This memo saves the attachment as a text file, opens memo, and loads up the memo again. I assign this to Fn-F3 as F3 is the "Attach" Fkey when looking at messages.
+
+Macro:
+{F3}{Enter}c:\text.doc{F10}{Esc}{Memo}{Menu}foc:\text{Enter}
+
+Description: Generate reply (used to reply to email messages). This macro generates the reply, deletes the "cc" that ccmail automatically sends to you, puts a reply separator string in the message. I assign this key to Fn-F6 as the F6 key is the "reply" key in ccMail.
+
+Macro:
+{F6}{Enter}{Tab}{Del}{Tab}{Tab}{Tab}{Enter}{Enter}{Enter}{Enter}{Up}----------REPLY SEPERATOR-----------{Enter}{PgUp}
+
+Description: Send outgoing message. This is for the special case where the Addressee in the "To" box has a double qoute {"} as the first character of the address, which is common (e.g. "Brian McIlvaine" Brian.McIlvaine@unbounded.com). I assign this macro to Fn-F5 as F5 is the "Send" Fkey for replies. When the first character is a {"}, ccMail generates a separate folder for that particular message. This macro goes to that folder, moves the message to the outbox, the goes back to that folder, so that you can manually delete the folder that ccMail created. I don't automatically delete as I have lost a folder that way in the past.
+
+Macro:
+{F5}{Enter}{Menu}vf{Esc}{End}{Enter}{F3}{Enter}{Esc}{End}
+
+
+					12. Closing comments: 
+
+	I hope you like it! Let me know what you think, and if you want the source code. If you use it, I would appreciate a post card:
+
+Brian McIlvaine
+PO Box 15779
+Chesapeake, VA 23328
+
+These I will likely just show my kids! Again, good luck!!
+
+
+Future enhancements:
+
+Ability to select a destination folder based on values found in header data. For example, all messages with "Fluff" in the subject line get sent to the folder named "Light reading".
+****** DONE! ********
+
+Other future enhancements are up to you! Let me know what would be useful.
+
+
+
+
+
+

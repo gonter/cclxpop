@@ -1,0 +1,17 @@
+This zip file contains the following files:
+
+cclxpop.exe		The program
+cclxpop.cfg		Sample configuration file
+cclxpop.doc		Documentation
+email1.bat		Sample batch file for use with LXMTA
+email2.bat		sample batch file for use with LXPOP/LXNNTP
+
+
+
+To use ccLXPOP, you must be able to connect to you ISP using LXPOP or LXMTA. These programs, and their documentation, are available at http:\\lxtcp.hplx.net
+
+I recommend you read the documentation! Good Luck! 
+
+
+Brian McIlvaine
+Brian.McIlvaine@unbounded.com

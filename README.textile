@@ -1,0 +1,15 @@
+h1. README
+
+h2. Location
+
+This project migrated on 2017-11-19 from Sourceforge (CVS) to Github
+(Git).  Please use the Github repository from now on.
+
+* https://sourceforge.net/projects/cclxpop/ *OBSOLETE REPOSITORY*
+* https://github.com/gonter/cclxpop
+
+h2. License
+
+Unless otherwise stated, the code in this repository can be used under
+terms of the GPL v2.0
+
